@@ -9,7 +9,7 @@
  * - Add keyboard shortcuts
  */
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -26,14 +26,6 @@ import { Column } from "./Column";
 import { TaskCard } from "./TaskCard";
 import { TaskModal } from "./TaskModal";
 import { FilterBar, FilterState } from "./FilterBar";
-
-// TODO: Keyboard Shortcuts
-// ========================
-// Planned shortcuts for future implementation:
-// - N: Open new task modal (in first column)
-// - /: Focus the search input in FilterBar
-// - Escape: Close open modal / clear filters
-// - ?: Show keyboard shortcuts help dialog
 
 interface BoardProps {
   board: BoardWithDetails;
@@ -56,6 +48,8 @@ export function Board({ board, onAddTask, onEditTask, onMoveTask, onDeleteTask }
     assignee: "",
   });
 
+  const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -63,6 +57,65 @@ export function Board({ board, onAddTask, onEditTask, onMoveTask, onDeleteTask }
       },
     })
   );
+
+  // Keyboard shortcuts: N = new task, / = focus search, Escape = close modal/clear, ? = help
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore shortcuts when typing in an input, textarea, or select
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
+        // Escape should still work inside inputs to close modals / clear filters
+        if (e.key === "Escape") {
+          if (modalState.open) {
+            setModalState({ open: false });
+          } else if (filters.search || filters.priority || filters.assignee) {
+            setFilters({ search: "", priority: "", assignee: "" });
+          }
+          (e.target as HTMLElement).blur();
+        }
+        return;
+      }
+
+      switch (e.key) {
+        case "n":
+        case "N": {
+          // Open new task modal in the first column
+          if (!modalState.open && board.columns.length > 0) {
+            e.preventDefault();
+            setModalState({ open: true, columnId: board.columns[0].id });
+          }
+          break;
+        }
+        case "/": {
+          // Focus the search input in FilterBar
+          e.preventDefault();
+          const searchInput = document.querySelector<HTMLInputElement>(
+            'input[placeholder="Search tasks..."]'
+          );
+          if (searchInput) searchInput.focus();
+          break;
+        }
+        case "Escape": {
+          if (modalState.open) {
+            setModalState({ open: false });
+          } else if (showShortcutsHelp) {
+            setShowShortcutsHelp(false);
+          } else if (filters.search || filters.priority || filters.assignee) {
+            setFilters({ search: "", priority: "", assignee: "" });
+          }
+          break;
+        }
+        case "?": {
+          e.preventDefault();
+          setShowShortcutsHelp((prev) => !prev);
+          break;
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [modalState.open, showShortcutsHelp, board.columns, filters]);
 
   // Apply client-side filters to the board columns
   const filteredBoard = useMemo(() => {
@@ -206,6 +259,40 @@ export function Board({ board, onAddTask, onEditTask, onMoveTask, onDeleteTask }
           onSave={handleModalSave}
           onClose={() => setModalState({ open: false })}
         />
+      )}
+
+      {/* Keyboard Shortcuts Help Dialog */}
+      {showShortcutsHelp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-surface-900/40 backdrop-blur-sm"
+            onClick={() => setShowShortcutsHelp(false)}
+          />
+          <div className="relative bg-white rounded-xl shadow-xl w-full max-w-sm p-5">
+            <h2 className="text-base font-semibold text-surface-800 mb-4">Keyboard Shortcuts</h2>
+            <dl className="space-y-2 text-sm">
+              {([
+                ["N", "Create new task"],
+                ["/", "Focus search input"],
+                ["Esc", "Close modal / clear filters"],
+                ["?", "Toggle this help dialog"],
+              ] as const).map(([key, desc]) => (
+                <div key={key} className="flex items-center gap-3">
+                  <kbd className="inline-flex items-center justify-center min-w-[28px] px-1.5 py-0.5 rounded bg-surface-100 border border-surface-200 text-xs font-mono font-medium text-surface-600">
+                    {key}
+                  </kbd>
+                  <span className="text-surface-600">{desc}</span>
+                </div>
+              ))}
+            </dl>
+            <button
+              onClick={() => setShowShortcutsHelp(false)}
+              className="mt-4 w-full py-2 rounded-lg text-sm text-surface-600 hover:bg-surface-100 transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
       )}
     </>
   );

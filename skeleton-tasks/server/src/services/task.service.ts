@@ -9,6 +9,7 @@
 
 import { query, queryOne, getPool } from "../db/connection";
 import { Task, CreateTaskInput, UpdateTaskInput, MoveTaskInput } from "@skeleton-tasks/shared";
+import { notify } from "./notification.service";
 
 export async function listTasks(boardId: string, filters?: {
   column_id?: string;
@@ -77,6 +78,19 @@ export async function createTask(boardId: string, input: CreateTaskInput): Promi
     ]
   );
 
+  // Notify assignee
+  if (result!.assignee) {
+    notify({
+      recipient: result!.assignee,
+      event_type: "task:created",
+      title: `New task: ${result!.title}`,
+      body: `You have been assigned a new task: "${result!.title}"`,
+      entity_type: "task",
+      entity_id: result!.id,
+      channels: ["in_app"],
+    }).catch((err) => console.error("[Notification] task:created failed:", err));
+  }
+
   return result!;
 }
 
@@ -117,10 +131,38 @@ export async function updateTask(id: string, input: UpdateTaskInput): Promise<Ta
   if (fields.length === 0) return getTask(id);
 
   values.push(id);
-  return queryOne<Task>(
+  const updated = await queryOne<Task>(
     `UPDATE tasks SET ${fields.join(", ")} WHERE id = $${paramCount} RETURNING *`,
     values
   );
+
+  // Notify on assignee change
+  if (input.assignee && updated) {
+    notify({
+      recipient: input.assignee,
+      event_type: "task:assigned",
+      title: `Task assigned: ${updated.title}`,
+      body: `You have been assigned to task: "${updated.title}"`,
+      entity_type: "task",
+      entity_id: updated.id,
+      channels: ["in_app"],
+    }).catch((err) => console.error("[Notification] task:assigned failed:", err));
+  }
+
+  // Notify on priority change to urgent
+  if (input.priority === "urgent" && updated?.assignee) {
+    notify({
+      recipient: updated.assignee,
+      event_type: "task:urgent",
+      title: `Urgent: ${updated.title}`,
+      body: `Task "${updated.title}" has been marked as urgent.`,
+      entity_type: "task",
+      entity_id: updated.id,
+      channels: ["in_app"],
+    }).catch((err) => console.error("[Notification] task:urgent failed:", err));
+  }
+
+  return updated;
 }
 
 export async function moveTask(id: string, input: MoveTaskInput): Promise<Task | null> {
@@ -183,6 +225,20 @@ export async function moveTask(id: string, input: MoveTaskInput): Promise<Task |
     );
 
     await client.query("COMMIT");
+
+    // Notify assignee of column change
+    if (oldColumnId !== newColumnId && result.rows[0]?.assignee) {
+      notify({
+        recipient: result.rows[0].assignee,
+        event_type: "task:moved",
+        title: `Task moved: ${result.rows[0].title}`,
+        body: `Task "${result.rows[0].title}" has been moved to a new column.`,
+        entity_type: "task",
+        entity_id: result.rows[0].id,
+        channels: ["in_app"],
+      }).catch((err) => console.error("[Notification] task:moved failed:", err));
+    }
+
     return result.rows[0];
   } catch (err) {
     await client.query("ROLLBACK");

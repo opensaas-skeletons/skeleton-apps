@@ -6,8 +6,11 @@
  * LLM BUILDERS: Add navigation items, user menu, board switcher, etc.
  */
 
-import React from "react";
+import React, { useState } from "react";
 import { LayoutDashboard, Download, Upload, Plus, RefreshCw } from "lucide-react";
+import type { Notification } from "@shared/types/notification";
+import { NotificationBell } from "./NotificationBell";
+import { NotificationPanel } from "./NotificationPanel";
 
 interface HeaderProps {
   boardTitle: string;
@@ -15,9 +18,25 @@ interface HeaderProps {
   onImport: () => void;
   onRefresh: () => void;
   onNewBoard: () => void;
+  notifications: Notification[];
+  unreadCount: number;
+  onMarkAsRead: (id: string) => void;
+  onMarkAllAsRead: () => void;
 }
 
-export function Header({ boardTitle, onExport, onImport, onRefresh, onNewBoard }: HeaderProps) {
+export function Header({
+  boardTitle,
+  onExport,
+  onImport,
+  onRefresh,
+  onNewBoard,
+  notifications,
+  unreadCount,
+  onMarkAsRead,
+  onMarkAllAsRead,
+}: HeaderProps) {
+  const [showPanel, setShowPanel] = useState(false);
+
   return (
     <header className="h-14 bg-white border-b border-surface-200 flex items-center justify-between px-5 flex-shrink-0">
       {/* Left — Logo & Board Title */}
@@ -53,6 +72,20 @@ export function Header({ boardTitle, onExport, onImport, onRefresh, onNewBoard }
         >
           <Upload size={16} />
         </button>
+
+        {/* Notification Bell */}
+        <div className="relative">
+          <NotificationBell unreadCount={unreadCount} onClick={() => setShowPanel(!showPanel)} />
+          {showPanel && (
+            <NotificationPanel
+              notifications={notifications}
+              onMarkAsRead={onMarkAsRead}
+              onMarkAllAsRead={onMarkAllAsRead}
+              onClose={() => setShowPanel(false)}
+            />
+          )}
+        </div>
+
         <div className="w-px h-5 bg-surface-200 mx-1" />
         <button
           onClick={onNewBoard}

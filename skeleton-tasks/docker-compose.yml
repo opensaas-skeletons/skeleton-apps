@@ -20,7 +20,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      - "0.0.0.0:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -34,7 +34,7 @@ services:
       context: .
       dockerfile: server/Dockerfile
     ports:
-      - "3001:3001"
+      - "0.0.0.0:3001:3001"
     environment:
       DB_HOST: db
       DB_PORT: 5432
@@ -42,7 +42,7 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres
       PORT: 3001
-      CORS_ORIGIN: http://localhost:5173
+      CORS_ORIGIN: "*"
       SEED_ON_START: "true"
     depends_on:
       db:
@@ -53,7 +53,7 @@ services:
       context: .
       dockerfile: client/Dockerfile
     ports:
-      - "5173:5173"
+      - "0.0.0.0:5173:5173"
     depends_on:
       - server
 

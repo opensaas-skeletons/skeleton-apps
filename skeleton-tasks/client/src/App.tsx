@@ -12,7 +12,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Header } from "./components/Header";
 import { Board } from "./components/Board";
+import { NotificationToast } from "./components/NotificationToast";
 import { useBoard } from "./hooks/useBoard";
+import { useNotifications } from "./hooks/useNotifications";
 import * as api from "./api/client";
 import type { Board as BoardType, CreateTaskInput, UpdateTaskInput } from "@shared/types/task";
 import { Loader2, AlertTriangle, Inbox, Trash2 } from "lucide-react";
@@ -24,6 +26,9 @@ export default function App() {
 
   const { board, loading, error, refresh, addTask, editTask, moveTaskToColumn, removeTask } =
     useBoard(selectedBoardId);
+
+  const { notifications, unreadCount, toast, dismissToast, markAsRead, markAllAsRead } =
+    useNotifications();
 
   // Load boards on mount
   const loadBoards = useCallback(async () => {
@@ -141,6 +146,10 @@ export default function App() {
           onImport={handleImport}
           onRefresh={refresh}
           onNewBoard={handleNewBoard}
+          notifications={notifications}
+          unreadCount={unreadCount}
+          onMarkAsRead={markAsRead}
+          onMarkAllAsRead={markAllAsRead}
         />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -165,6 +174,7 @@ export default function App() {
             </div>
           </div>
         </div>
+        {toast && <NotificationToast notification={toast} onDismiss={dismissToast} />}
       </div>
     );
   }
@@ -177,6 +187,10 @@ export default function App() {
         onImport={handleImport}
         onRefresh={refresh}
         onNewBoard={handleNewBoard}
+        notifications={notifications}
+        unreadCount={unreadCount}
+        onMarkAsRead={markAsRead}
+        onMarkAllAsRead={markAllAsRead}
       />
 
       {/* Board selector (if multiple boards) */}
@@ -230,6 +244,9 @@ export default function App() {
           onDeleteTask={removeTask}
         />
       ) : null}
+
+      {/* Notification Toast */}
+      {toast && <NotificationToast notification={toast} onDismiss={dismissToast} />}
     </div>
   );
 }

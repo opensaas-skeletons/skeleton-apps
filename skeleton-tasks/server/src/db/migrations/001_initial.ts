@@ -10,9 +10,7 @@
  * statements there. Don't modify this file — keep migrations additive.
  */
 
-import pool from "../connection";
-
-const MIGRATION_SQL = `
+export const up = `
   -- Enable UUID generation
   CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -83,18 +81,3 @@ const MIGRATION_SQL = `
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at();
 `;
-
-async function migrate() {
-  console.log("🔄 Running migrations...");
-  try {
-    await pool.query(MIGRATION_SQL);
-    console.log("✅ Migrations complete!");
-  } catch (err) {
-    console.error("❌ Migration failed:", err);
-    process.exit(1);
-  } finally {
-    await pool.end();
-  }
-}
-
-migrate();

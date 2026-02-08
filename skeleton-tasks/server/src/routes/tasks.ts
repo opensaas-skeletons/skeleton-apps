@@ -9,6 +9,7 @@
 
 import { Router, Request, Response, NextFunction } from "express";
 import * as taskService from "../services/task.service";
+import { query, queryOne } from "../db/connection";
 import { NotFoundError, ValidationError } from "../errors";
 
 const router = Router();
@@ -109,6 +110,55 @@ router.delete("/tasks/:id", async (req: Request, res: Response, next: NextFuncti
       throw new NotFoundError("Task not found");
     }
     res.json({ success: true, data: { deleted: true } });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/tasks/ingest — Create a task from an external source (e.g. skeleton-automation)
+router.post("/tasks/ingest", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { title, description, priority, assignee, labels, due_date, board_id, column_id, metadata } = req.body;
+
+    if (!title || typeof title !== "string" || title.trim().length === 0) {
+      throw new ValidationError("title is required");
+    }
+
+    // Resolve board: use provided board_id or fall back to the first board
+    let resolvedBoardId = board_id;
+    if (!resolvedBoardId) {
+      const firstBoard = await queryOne<{ id: string }>("SELECT id FROM boards ORDER BY created_at ASC LIMIT 1");
+      if (!firstBoard) {
+        throw new ValidationError("No boards exist. Create a board first.");
+      }
+      resolvedBoardId = firstBoard.id;
+    }
+
+    // Resolve column: use provided column_id or fall back to the first column of the board
+    let resolvedColumnId = column_id;
+    if (!resolvedColumnId) {
+      const firstColumn = await queryOne<{ id: string }>(
+        "SELECT id FROM columns WHERE board_id = $1 ORDER BY position ASC LIMIT 1",
+        [resolvedBoardId]
+      );
+      if (!firstColumn) {
+        throw new ValidationError("No columns exist on the target board.");
+      }
+      resolvedColumnId = firstColumn.id;
+    }
+
+    const task = await taskService.createTask(resolvedBoardId, {
+      title: title.trim(),
+      description: description || "",
+      priority: priority || "medium",
+      assignee: assignee || null,
+      labels: labels || [],
+      due_date: due_date || null,
+      column_id: resolvedColumnId,
+      metadata: metadata || {},
+    });
+
+    res.status(201).json({ success: true, data: task });
   } catch (err) {
     next(err);
   }
