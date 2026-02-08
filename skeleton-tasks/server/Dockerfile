@@ -2,16 +2,22 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy shared types first (dependency for server)
+# Copy root package.json for workspace resolution
+COPY package.json ./
+
+# Copy shared package first (workspace dependency)
 COPY shared/ ./shared/
 
-# Install server dependencies
+# Copy server package.json
 COPY server/package*.json ./server/
-WORKDIR /app/server
-RUN npm install
+
+# Install dependencies using workspaces
+RUN npm install --workspace=server
 
 # Copy server source
-COPY server/ ./
+COPY server/ ./server/
+
+WORKDIR /app/server
 
 # Run migrations always, seed only if SEED_ON_START=true
 CMD sh -c "npx tsx src/db/migrate.ts && \

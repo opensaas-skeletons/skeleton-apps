@@ -105,18 +105,17 @@ See [INTEROP-STANDARD.md](INTEROP-STANDARD.md) for the full specification.
 - [ARCHITECTURE.md](ARCHITECTURE.md) — System design and request flows
 - [LLM-GUIDE.md](LLM-GUIDE.md) — Guide for AI-assisted development
 - [INTEROP-STANDARD.md](INTEROP-STANDARD.md) — Data portability specification
+- [CHANGELOG.md](CHANGELOG.md) — Version history
 - [docs/customization-guide.md](docs/customization-guide.md) — Theme, columns, and UI customization
 - [docs/deployment-guide.md](docs/deployment-guide.md) — Production deployment
 - [docs/adding-features.md](docs/adding-features.md) — Adding endpoints, components, and tables
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests: `npm test`
-5. Submit a pull request
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+This project follows our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE) for details.

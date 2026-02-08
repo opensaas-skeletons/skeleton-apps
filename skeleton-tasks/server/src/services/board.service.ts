@@ -8,8 +8,7 @@
  */
 
 import { query, queryOne, getPool } from "../db/connection";
-import { Board, BoardWithDetails, ColumnWithTasks, CreateBoardInput, UpdateBoardInput, CreateColumnInput, UpdateColumnInput } from "../../../shared/types/task";
-import { DEFAULT_COLUMNS } from "../../../shared/constants";
+import { Board, BoardWithDetails, ColumnWithTasks, CreateBoardInput, UpdateBoardInput, CreateColumnInput, UpdateColumnInput, DEFAULT_COLUMNS } from "@skeleton-tasks/shared";
 
 export async function listBoards(): Promise<Board[]> {
   return query<Board>("SELECT * FROM boards ORDER BY created_at DESC");

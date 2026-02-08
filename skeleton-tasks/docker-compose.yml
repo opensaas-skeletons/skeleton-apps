@@ -12,8 +12,6 @@
 # Data is persisted in a Docker volume (pgdata).
 # To start fresh: docker-compose down -v
 
-version: "3.8"
-
 services:
   db:
     image: postgres:16-alpine

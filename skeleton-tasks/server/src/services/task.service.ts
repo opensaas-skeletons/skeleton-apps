@@ -8,7 +8,7 @@
  */
 
 import { query, queryOne, getPool } from "../db/connection";
-import { Task, CreateTaskInput, UpdateTaskInput, MoveTaskInput } from "../../../shared/types/task";
+import { Task, CreateTaskInput, UpdateTaskInput, MoveTaskInput } from "@skeleton-tasks/shared";
 
 export async function listTasks(boardId: string, filters?: {
   column_id?: string;

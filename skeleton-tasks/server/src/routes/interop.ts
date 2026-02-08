@@ -14,8 +14,7 @@
 
 import { Router, Request, Response } from "express";
 import { query } from "../db/connection";
-import { ExportPayload, BoardExport } from "../../../shared/types/task";
-import { INTEROP_VERSION, APP_NAME } from "../../../shared/constants";
+import { ExportPayload, BoardExport, INTEROP_VERSION, APP_NAME } from "@skeleton-tasks/shared";
 import * as boardService from "../services/board.service";
 
 const router = Router();

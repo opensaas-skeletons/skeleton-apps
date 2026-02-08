@@ -13,7 +13,7 @@
  */
 
 import pool from "./connection";
-import { DEFAULT_COLUMNS } from "../../shared/constants";
+import { DEFAULT_COLUMNS } from "@skeleton-tasks/shared";
 
 async function seed() {
   // Production safety check
