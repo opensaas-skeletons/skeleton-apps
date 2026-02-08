@@ -1,0 +1,63 @@
+# ============================================
+# Skeleton Tasks — Docker Compose
+# ============================================
+# Run: docker-compose up
+# That's it. The entire stack starts up.
+#
+# Services:
+#   - db:     PostgreSQL 16 database
+#   - server: Node.js API server (port 3001)
+#   - client: React dev server (port 5173)
+#
+# Data is persisted in a Docker volume (pgdata).
+# To start fresh: docker-compose down -v
+
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: skeleton_tasks
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: skeleton_tasks
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      PORT: 3001
+      CORS_ORIGIN: http://localhost:5173
+      SEED_ON_START: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+
+volumes:
+  pgdata:

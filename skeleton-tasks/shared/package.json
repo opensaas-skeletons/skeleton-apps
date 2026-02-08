@@ -1,0 +1,8 @@
+{
+  "name": "@skeleton-tasks/shared",
+  "version": "1.0.0",
+  "description": "Shared types and constants for the Skeleton Tasks project",
+  "main": "index.ts",
+  "types": "index.ts",
+  "license": "MIT"
+}
