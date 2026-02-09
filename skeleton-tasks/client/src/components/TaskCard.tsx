@@ -13,6 +13,7 @@ import React from "react";
 import { Calendar, Tag, User, GripVertical, Trash2, AlertCircle } from "lucide-react";
 import type { Task } from "@shared/types/task";
 import { PRIORITY_COLORS } from "@shared/constants";
+import { useModal } from "../contexts/ModalContext";
 
 interface TaskCardProps {
   task: Task;
@@ -25,6 +26,7 @@ interface TaskCardProps {
 export function TaskCard({ task, onClick, onDelete, isDragging, dragHandleProps }: TaskCardProps) {
   const isOverdue = task.due_date && new Date(task.due_date) < new Date();
   const priorityColor = PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.medium;
+  const modal = useModal();
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -67,9 +69,9 @@ export function TaskCard({ task, onClick, onDelete, isDragging, dragHandleProps 
       {/* Delete button */}
       <button
         className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-red-50 text-surface-400 hover:text-red-500"
-        onClick={(e) => {
+        onClick={async (e) => {
           e.stopPropagation();
-          if (window.confirm("Delete this task?")) {
+          if (await modal.confirm({ message: "Delete this task?", variant: "destructive", confirmLabel: "Delete" })) {
             onDelete();
           }
         }}
