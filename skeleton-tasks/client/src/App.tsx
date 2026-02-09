@@ -16,6 +16,7 @@ import { NotificationToast } from "./components/NotificationToast";
 import { useBoard } from "./hooks/useBoard";
 import { useNotifications } from "./hooks/useNotifications";
 import * as api from "./api/client";
+import { useModal } from "./contexts/ModalContext";
 import type { Board as BoardType, CreateTaskInput, UpdateTaskInput } from "@shared/types/task";
 import { Loader2, AlertTriangle, Inbox, Trash2 } from "lucide-react";
 
@@ -29,6 +30,8 @@ export default function App() {
 
   const { notifications, unreadCount, toast, dismissToast, markAsRead, markAllAsRead } =
     useNotifications();
+
+  const modal = useModal();
 
   // Load boards on mount
   const loadBoards = useCallback(async () => {
@@ -53,7 +56,7 @@ export default function App() {
   // ---- Handlers ----
 
   const handleNewBoard = async () => {
-    const title = prompt("Board name:");
+    const title = await modal.prompt("Board name:");
     if (!title) return;
 
     try {
@@ -61,7 +64,7 @@ export default function App() {
       setBoards((prev) => [newBoard, ...prev]);
       setSelectedBoardId(newBoard.id);
     } catch (err) {
-      alert("Failed to create board");
+      await modal.alert({ message: "Failed to create board", variant: "error" });
     }
   };
 
@@ -76,7 +79,7 @@ export default function App() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
-      alert("Failed to export data");
+      await modal.alert({ message: "Failed to export data", variant: "error" });
     }
   };
 
@@ -92,11 +95,11 @@ export default function App() {
         const text = await file.text();
         const data = JSON.parse(text);
         const result = await api.importData(data);
-        alert(`Imported ${result.imported_boards} board(s) successfully!`);
+        await modal.alert({ message: `Imported ${result.imported_boards} board(s) successfully!`, variant: "success" });
         await loadBoards();
         refresh();
       } catch (err) {
-        alert("Failed to import data. Make sure the file is valid JSON.");
+        await modal.alert({ message: "Failed to import data. Make sure the file is valid JSON.", variant: "error" });
       }
     };
     input.click();
@@ -106,7 +109,7 @@ export default function App() {
     const boardToDelete = boards.find((b) => b.id === boardId);
     if (!boardToDelete) return;
 
-    if (!window.confirm(`Delete board "${boardToDelete.title}"? This will delete all columns and tasks in this board.`)) {
+    if (!(await modal.confirm({ message: `Delete board "${boardToDelete.title}"? This will delete all columns and tasks in this board.`, variant: "destructive", confirmLabel: "Delete" }))) {
       return;
     }
 
@@ -118,7 +121,7 @@ export default function App() {
         setSelectedBoardId(remaining.length > 0 ? remaining[0].id : null);
       }
     } catch (err) {
-      alert("Failed to delete board");
+      await modal.alert({ message: "Failed to delete board", variant: "error" });
     }
   };
 
