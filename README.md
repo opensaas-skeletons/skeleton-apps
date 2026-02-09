@@ -8,10 +8,11 @@ All apps share the same architecture and tech stack, so patterns you learn in on
 
 | App | What It Is | Think Of It As |
 |-----|-----------|----------------|
-| [skeleton-tasks](./skeleton-tasks/) | Kanban board with drag-and-drop, priorities, labels, and assignments | A starting point for Trello/Linear |
-| [skeleton-automation](./skeleton-automation/) | Workflow engine with triggers, conditions, scheduled jobs, and webhook actions | A starting point for Zapier/n8n |
-| [skeleton-database](./skeleton-database/) | Spreadsheet/database with 13 field types, grid/form views, and CSV import | A starting point for Airtable/NocoDB |
-| [skeleton-wiki](./skeleton-wiki/) | Wiki/knowledge base with Markdown pages, tree hierarchy, search, and version history | A starting point for Notion/Confluence |
+| [skeleton-tasks](https://github.com/opensaas-skeletons/skeleton-tasks) | Kanban board with drag-and-drop, priorities, labels, and assignments | A starting point for Trello/Linear |
+| [skeleton-automation](https://github.com/opensaas-skeletons/skeleton-automation) | Workflow engine with triggers, conditions, scheduled jobs, and webhook actions | A starting point for Zapier/n8n |
+| [skeleton-database](https://github.com/opensaas-skeletons/skeleton-database) | Spreadsheet/database with 13 field types, grid/form views, and CSV import | A starting point for Airtable/NocoDB |
+| [skeleton-wiki](https://github.com/opensaas-skeletons/skeleton-wiki) | Wiki/knowledge base with Markdown pages, tree hierarchy, search, and version history | A starting point for Notion/Confluence |
+| [skeleton-crm](https://github.com/opensaas-skeletons/skeleton-crm) | CRM with contacts, companies, deal pipelines (kanban), activities, and dashboard analytics | A starting point for HubSpot/Pipedrive |
 
 ## What You Get
 
@@ -33,7 +34,7 @@ The apps are designed to be read and modified. The codebases are intentionally s
 Each app runs independently. Pick one and:
 
 ```bash
-cd skeleton-tasks  # or skeleton-automation, skeleton-database, skeleton-wiki
+cd skeleton-tasks  # or skeleton-automation, skeleton-database, skeleton-wiki, skeleton-crm
 
 # Start with Docker (recommended)
 docker compose up --build
@@ -51,10 +52,11 @@ npm run dev
 | skeleton-automation | 5433 | 3002 | 5174 |
 | skeleton-database | 5434 | 3003 | 5175 |
 | skeleton-wiki | 5435 | 3004 | 5176 |
+| skeleton-crm | 5436 | 3005 | 5177 |
 
 ## Tech Stack
 
-All three apps use:
+All five apps use:
 
 - **Frontend:** React 18, TypeScript, Vite, Tailwind CSS
 - **Backend:** Node.js, Express, TypeScript
@@ -72,11 +74,11 @@ app/
 
 ## How the Apps Relate to Each Other
 
-The apps are **independent**. They don't require each other to run and don't communicate out of the box. You can use just one, or all three.
+The apps are **independent**. They don't require each other to run and don't communicate out of the box. You can use just one, or all five.
 
 ### Data Portability (Export/Import)
 
-All three apps implement a shared JSON export format with a common envelope:
+All five apps implement a shared JSON export format with a common envelope:
 
 ```json
 {
