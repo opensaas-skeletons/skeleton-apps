@@ -2,7 +2,7 @@
 
 A collection of full-stack SaaS starter applications. Each app is a complete, working product that you can fork, customize, and build your own SaaS on top of — rather than starting from scratch.
 
-All three apps share the same architecture and tech stack, so patterns you learn in one transfer directly to the others.
+All apps share the same architecture and tech stack, so patterns you learn in one transfer directly to the others.
 
 ## The Apps
 
@@ -11,6 +11,7 @@ All three apps share the same architecture and tech stack, so patterns you learn
 | [skeleton-tasks](./skeleton-tasks/) | Kanban board with drag-and-drop, priorities, labels, and assignments | A starting point for Trello/Linear |
 | [skeleton-automation](./skeleton-automation/) | Workflow engine with triggers, conditions, scheduled jobs, and webhook actions | A starting point for Zapier/n8n |
 | [skeleton-database](./skeleton-database/) | Spreadsheet/database with 13 field types, grid/form views, and CSV import | A starting point for Airtable/NocoDB |
+| [skeleton-wiki](./skeleton-wiki/) | Wiki/knowledge base with Markdown pages, tree hierarchy, search, and version history | A starting point for Notion/Confluence |
 
 ## What You Get
 
@@ -32,7 +33,7 @@ The apps are designed to be read and modified. The codebases are intentionally s
 Each app runs independently. Pick one and:
 
 ```bash
-cd skeleton-tasks  # or skeleton-automation, skeleton-database
+cd skeleton-tasks  # or skeleton-automation, skeleton-database, skeleton-wiki
 
 # Start with Docker (recommended)
 docker compose up --build
@@ -49,6 +50,7 @@ npm run dev
 | skeleton-tasks | 5432 | 3001 | 5173 |
 | skeleton-automation | 5433 | 3002 | 5174 |
 | skeleton-database | 5434 | 3003 | 5175 |
+| skeleton-wiki | 5435 | 3004 | 5176 |
 
 ## Tech Stack
 

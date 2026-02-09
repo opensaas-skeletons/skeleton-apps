@@ -1,0 +1,10 @@
+{
+  "name": "@skeleton-wiki/shared",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "index.ts",
+  "scripts": {
+    "build": "tsc"
+  }
+}
