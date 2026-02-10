@@ -1,0 +1,76 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: skeleton_ai
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "0.0.0.0:5437:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:11434/api/tags || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    ports:
+      - "0.0.0.0:3006:3006"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: skeleton_ai
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      PORT: 3006
+      CORS_ORIGIN: "*"
+      SEED_ON_START: "true"
+      LLM_PROVIDER: ollama
+      OLLAMA_URL: http://ollama:11434
+      SYNC_REPO_PATH: /app/repos
+      SYNC_ENABLED: "true"
+    volumes:
+      - ../skeleton-tasks:/data/skeleton-tasks:ro
+      - ../skeleton-automation:/data/skeleton-automation:ro
+      - ../skeleton-database:/data/skeleton-database:ro
+      - ../skeleton-wiki:/data/skeleton-wiki:ro
+      - ../skeleton-crm:/data/skeleton-crm:ro
+      - ./data:/app/data:ro
+      - repo_data:/app/repos
+    depends_on:
+      db:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    ports:
+      - "0.0.0.0:5178:5178"
+    environment:
+      API_URL: http://server:3006
+    depends_on:
+      - server
+
+volumes:
+  pgdata:
+  ollama_data:
+  repo_data:
